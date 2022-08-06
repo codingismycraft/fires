@@ -13,9 +13,48 @@ import tensorflow as tf
 
 app = Flask(__name__)
 
-_models = []
-
 _CURRENT_DIR = os.path.dirname(os.path.realpath(__file__))
+
+
+class ActiveModels:
+    """Holds the models that will be used to detect fires."""
+
+    # The name of the pretrained models to use.
+    _MODELS = [
+        "model.h5",
+        "model2.h5",
+        "model3.h5",
+        "model-11.h5",
+        "model-12.h5"
+    ]
+
+    # Holds the model instances.
+    _models = None
+
+    @classmethod
+    def get_models(cls):
+        """Returns the models to use for fire detection.
+
+        :return: A list of models.
+        :rtype: list
+        """
+        if not cls._models:
+            cls._load_models()
+        return cls._models
+
+    @classmethod
+    def _load_models(cls):
+        """Loads the models that will be used to detect fire.
+
+        :return: A list of models.
+        :rtype: list
+        """
+        cls._models = []
+        models_dir = os.path.join(_CURRENT_DIR, "..", "fires", "new_model")
+        for model_file_name in cls._MODELS:
+            full_path = os.path.join(models_dir, model_file_name)
+            cls._models.append(load_model(full_path))
+
 
 @app.route("/processimage", methods=['POST'])
 def processimage():
@@ -23,14 +62,9 @@ def processimage():
     if request.method == 'POST':
         img = request.files["image"]
         if img:
-            img_filename = os.path.join(os.getcwd() + "/static", str(uuid.uuid4()))
+            img_filename = os.path.join(os.getcwd() + "/static",
+                                        str(uuid.uuid4()))
             img.save(img_filename)
-            if not _models:
-                models_dir = os.path.join("/vagrant", "fires", "new_model")
-                for dirname, _, filenames in os.walk(models_dir):
-                    for filename in filenames:
-                        path = os.path.join(dirname, filename)
-                        _models.append(load_model(path))
 
             img = image.load_img(img_filename)
             img = image.img_to_array(img) / 255
@@ -38,7 +72,7 @@ def processimage():
             img = tf.expand_dims(img, axis=0)
 
             predictions = []
-            for model in _models:
+            for model in ActiveModels.get_models():
                 try:
                     predictions.append(
                         int(tf.round(model.predict(x=img)).numpy()[0][0])
@@ -46,23 +80,23 @@ def processimage():
                 except Exception as ex:
                     print(ex)
 
-            has_fire, does_not_have_fire = 0,0
+            has_fire, does_not_have_fire = 0, 0
             for p in predictions:
                 if int(p) == 0:
                     has_fire += 1
                 else:
                     does_not_have_fire += 1
 
-            probability = has_fire * 1. /(has_fire + does_not_have_fire)
+            probability = has_fire * 1. / (has_fire + does_not_have_fire)
 
             return jsonify(
                 {
                     "has_fire": probability > 0.5,
-                    "predictions": [ "NO" if p == 1 else "YES"  for p in predictions]
+                    "predictions": ["NO" if p == 1 else "YES" for p in
+                                    predictions]
 
                 }
             )
-
 
     return "ok"
 
