@@ -50,7 +50,7 @@ class ActiveModels:
         :rtype: list
         """
         cls._models = []
-        models_dir = os.path.join(_CURRENT_DIR, "..", "fires", "new_model")
+        models_dir = os.path.join(_CURRENT_DIR, "/vagrant", "fires", "new_model")
         for model_file_name in cls._MODELS:
             full_path = os.path.join(models_dir, model_file_name)
             cls._models.append(load_model(full_path))
