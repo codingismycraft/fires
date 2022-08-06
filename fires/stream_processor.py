@@ -27,8 +27,9 @@ def load_models():
     models_dir = os.path.join("new_model")
     for dirname, _, filenames in os.walk(models_dir):
         for filename in filenames:
-            path = os.path.join(dirname, filename)
-            models.append(load_model(path))
+            if "kaggle" not in filename:
+                path = os.path.join(dirname, filename)
+                models.append(load_model(path))
     return models
 
 
@@ -44,7 +45,7 @@ def image_has_fire(rgb, models):
             )
         except Exception as ex:
             print(ex)
-        if len(predictions) >= 3:
+        if len(predictions) >= 2:
             break
 
     has_fire, does_not_have_fire = 0, 0
