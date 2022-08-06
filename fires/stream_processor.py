@@ -23,6 +23,7 @@ def detect_brightness(image, radius=71):
 
 
 def load_models():
+    print("Loading models from disc...")
     models = []
     models_dir = os.path.join("new_model")
     for dirname, _, filenames in os.walk(models_dir):
@@ -30,6 +31,7 @@ def load_models():
             if "kaggle" not in filename:
                 path = os.path.join(dirname, filename)
                 models.append(load_model(path))
+    print("models are ready!")
     return models
 
 
@@ -102,20 +104,11 @@ def main():
                 thickness=5
             )
             now = datetime.datetime.now()
-            if (now - last_time_spoke).total_seconds() >= 1:
+            if (now - last_time_spoke).total_seconds() >= 5:
                 os.system('spd-say "has fire.."')
                 last_time_spoke = now
             detect_brightness(image)
-        else:
-            cv2.putText(
-                img=image,
-                text="no fire",
-                org=(60, 60),
-                fontFace=cv2.FONT_HERSHEY_DUPLEX,
-                fontScale=2,
-                color=(125, 246, 55),
-                thickness=5
-            )
+
 
         cv2.imshow('Sample Application.', image)
         if cv2.waitKey(1) == ord('q'):
