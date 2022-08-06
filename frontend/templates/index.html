@@ -1,0 +1,84 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <title>HTML DOM - Paste an image from the clipboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <style>
+        .container {
+            /* Center the content */
+            align-items: center;
+            display: flex;
+            justify-content: center;
+
+            /* Misc */
+            height: 32rem;
+            padding: 1rem 0;
+        }
+
+        .key {
+            background-color: #f7fafc;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.25rem;
+            padding: 0.25rem;
+        }
+
+        .preview {
+            align-items: center;
+            border: 1px solid #cbd5e0;
+            display: flex;
+            justify-content: center;
+
+            margin-top: 1rem;
+            max-height: 16rem;
+            max-width: 42rem;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div>
+        <img class="preview" id="preview"/>
+    </div>
+    <div id="comment">Paste your image here..</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('paste', function (evt) {
+            const clipboardItems = evt.clipboardData.items;
+            const items = [].slice.call(clipboardItems).filter(function (item) {
+                return item.type.indexOf('image') !== -1;
+            });
+            if (items.length === 0) {
+                return;
+            }
+            const item = items[0];
+            const blob = item.getAsFile();
+            const imageEle = document.getElementById('preview');
+            imageEle.src = URL.createObjectURL(blob);
+
+            const formData = new FormData();
+            formData.append('image', blob, 'filename');
+
+            const req = new XMLHttpRequest();
+            req.open('POST', '/processimage', true);
+
+            req.onload = function () {
+                if (req.status >= 200 && req.status < 400) {
+                    const res = req.responseText;
+                    const obj = JSON.parse(res);
+                    const div = document.getElementById('comment');
+                    if (obj.has_fire) {
+                        div.innerHTML  = "<h1>Has fire</h1>" + obj.predictions
+                    } else {
+                        div.innerHTML = "<h3>No fire</h3>"+ obj.predictions
+                    }
+                }
+            };
+            req.send(formData);
+        });
+    });
+</script>
+</body>
+</html>
+
