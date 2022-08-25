@@ -12,7 +12,6 @@ as can be seen here:
     export PYTHONPATH=/home/john/repos/fires:$PYTHONPATH.
 
 
+### Click the image for a presentation
 [![IMAGE ALT TEXT](http://img.youtube.com/vi/M7iHSyT81GA/0.jpg)](http://www.youtube.com/watch?v=M7iHSyT81GA "fire detection")
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=M7iHSyT81GA" target="_blank"><img src="http://img.youtube.com/vi/M7iHSyT81GA/0.jpg" 
-alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
